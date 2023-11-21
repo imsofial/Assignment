@@ -8,8 +8,8 @@ class Course {
     static int courseId;
     String courseName;
     List<Student> enrolledStudents = new ArrayList<>();
-    String courseLevel;
-    public Course(String courseName0, String courseLevel0){
+    CourseLevel courseLevel;
+    public Course(String courseName0, CourseLevel courseLevel0){
         numberOfCourses++;
         courseName = courseName0;
         courseLevel = courseLevel0;
@@ -117,28 +117,26 @@ public class UniversityCourseManagmentSystem {
     static List<Course> allCourses = new ArrayList<>();
     static List<UniversityMember> allMembers = new ArrayList<>();
 
-    String testCourseLevel(CourseLevel courseLevel){
-        switch (courseLevel){
-            case MASTER:
-                return "MASTER";
-            case BACHELOR:
-                return "BACHELOR";
+    public static CourseLevel tryValueOf(String courseLevel){
+        try {
+            return CourseLevel.valueOf(courseLevel);
+        } catch (Throwable th){
+            return null;
         }
-        return null;
     }
-    boolean add_course(){
-        String courseName = s.next();
+    static boolean add_course(String courseName, String courseLevelAsString){
+        if (courseName.charAt(0)=='_' || courseName.charAt(courseName.length()-1)=='_'){
+            System.out.println("Wrong inputs");
+            return false;
+        }
         for (int i=0;i<courseName.length();i++){ //check if name consist of english letters
             char c = courseName.charAt(i);
-            if (!((c>='A' && c<='Z') || (c>='a'&&c<='z'))){
-                if (!(i==0 || i==courseName.length()-1) || !(c == '_')) {
-                    System.out.println("Wrong inputs");
-                    return false;
-                }
+            if (!(c>='A' && c<='Z') && !(c>='a'&&c<='z') && (c!='_')) {
+                System.out.println("Wrong inputs");
+                return false;
             }
         }
-        String courseLevel = s.next();
-        courseLevel = testCourseLevel(CourseLevel.valueOf(courseLevel));
+        CourseLevel courseLevel = tryValueOf(courseLevelAsString);
         if (courseLevel==null){
             System.out.println("Wrong inputs");
             return false;
@@ -147,8 +145,7 @@ public class UniversityCourseManagmentSystem {
         System.out.println("Added successfully");
         return true;
     }
-    boolean add_student(){
-        String memberName = s.next();
+    static boolean add_student(String memberName){
         for (int i=0;i<memberName.length();i++){ //check if name consist of english letters
             char c = memberName.charAt(i);
             if (!((c>='A' && c<='Z') || (c>='a'&&c<='z'))){
@@ -156,12 +153,15 @@ public class UniversityCourseManagmentSystem {
                 return false;
             }
         }
+        if (memberName == "student"){
+            System.out.println("Wrong inputs");
+            return false;
+        }
         allMembers.add(new Student(memberName));
         System.out.println("Added successfully");
         return true;
     }
-    boolean add_professor(){
-        String memberName = s.next();
+    static boolean add_professor(String memberName){
         for (int i=0;i<memberName.length();i++){ //check if name consist of english letters
             char c = memberName.charAt(i);
             if (!((c>='A' && c<='Z') || (c>='a'&&c<='z'))){
@@ -177,49 +177,78 @@ public class UniversityCourseManagmentSystem {
         System.out.println("Added successfully");
         return true;
     }
-    static void enroll_to_course(){
-        int memberId = s.nextInt();
-        int courseId = s.nextInt();
-        Student st = (Student) allMembers.get(memberId);
-        st.enroll(allCourses.get(courseId));
+    static void enroll_to_course(int memberId, int courseId){
+        Student st = (Student) allMembers.get(memberId-1);
+        st.enroll(allCourses.get(courseId-1));
         System.out.println("Enrolled successfully");
     }
-    void drop_from_course(){
-        int memberId = s.nextInt();
-        int courseId = s.nextInt();
-        Student st = (Student) allMembers.get(memberId);
-        st.drop(allCourses.get(courseId));
+    static void drop_from_course(int memberId, int courseId){
+        Student st = (Student) allMembers.get(memberId-1);
+        st.drop(allCourses.get(courseId-1));
         System.out.println("Dropped successfully");
 
     }
-    void assign_to_course(){
-        int memberId = s.nextInt();
-        int courseId = s.nextInt();
-        Professor prof = (Professor) allMembers.get(memberId);
-        prof.teach(allCourses.get(courseId));
+    static void assign_to_course(int memberId, int courseId){
+        Professor prof = (Professor) allMembers.get(memberId-1);
+        prof.teach(allCourses.get(courseId-1));
         System.out.println("Professor is successfully assigned to teach this course\n");
     }
-    void exempt_from_course(){
-        int memberId = s.nextInt();
-        int courseId = s.nextInt();
-        Professor prof = (Professor) allMembers.get(memberId);
-        prof.exempt(allCourses.get(courseId));
+    static void exempt_from_course(int memberId, int courseId){
+        Professor prof = (Professor) allMembers.get(memberId-1);
+        prof.exempt(allCourses.get(courseId-1));
         System.out.println("Professor is exempted\n");
     }
     public static void main(String[] args) {
 
-        allCourses.add(new Course("java_beginner","bachelor"));
-        allCourses.add(new Course("java_intermediate","bachelor"));
-        allCourses.add(new Course("python_basics","bachelor"));
-        allCourses.add(new Course("algorithms","master"));
-        allCourses.add(new Course("advanced_programming","master"));
-        allCourses.add(new Course("mathematical_analysis","master"));
-        allCourses.add(new Course("computer_vision","master"));
-        allMembers.add(new Student("Alice"));
-        allMembers.add(new Student("Bob"));
-        allMembers.add(new Student("Alex"));
-        Student st = (Student) allMembers.get(0);
-        st.enroll((Course) allMembers.get(0));
+        add_course("java_beginner","bachelor");
+        add_course("java_intermediate","bachelor");
+        add_course("python_basics","bachelor");
+        add_course("algorithms","master");
+        add_course("advanced_programming","master");
+        add_course("mathematical_analysis","master");
+        add_course("computer_vision","master");
+        add_student("Alice");
+        add_student("Bob");
+        add_student("Alex");
+        enroll_to_course(1,1);
+        enroll_to_course(1,2);
+        enroll_to_course(1,3);
+        enroll_to_course(2,1);
+        enroll_to_course(2,4);
+        enroll_to_course(3,5);
+        add_professor("Ali");
+        add_professor("Ahmed");
+        add_professor("Andrey");
+        while (s.hasNext()){
+            String comand = s.next();
+            if (comand == "course"){
+                String courseName = s.next();
+                String courseLevel = s.next();
+                add_course(courseName,courseLevel);
+            } else if (comand == "student") {
+                String memberName = s.next();
+                add_student(memberName);
+            } else if (comand == "professor"){
+                String memberName = s.next();
+                add_student(memberName);
+            }else if (comand == "enroll"){
+                int memberId = s.nextInt();
+                int courseId = s.nextInt();
+                enroll_to_course(memberId,courseId);
+            } else if (comand == "drop"){
+                int memberId = s.nextInt();
+                int courseId = s.nextInt();
+                drop_from_course(memberId,courseId);
+            }else if (comand == "teach"){
+                int memberId = s.nextInt();
+                int courseId = s.nextInt();
+                assign_to_course(memberId,courseId);
+            }else if (comand == "exempt"){
+                int memberId = s.nextInt();
+                int courseId = s.nextInt();
+                exempt_from_course(memberId,courseId);
+            }
+        }
 
     }
     public static void fillinitialData(){
